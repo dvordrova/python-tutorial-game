@@ -1,3 +1,5 @@
+import time
+
 from fastapi import FastAPI
 
 from app.levels import levels
@@ -11,8 +13,9 @@ from icecream import ic
 app = FastAPI()
 
 
-@app.get("/level/{level_id}", response_model=GetLevelResponse)
+@app.get("/api/level/{level_id}", response_model=GetLevelResponse)
 async def get_level(level_id: int):
+    time.sleep(0.2)
     if level_id in levels:
         return {
             'state': 'success',
@@ -24,7 +27,7 @@ async def get_level(level_id: int):
             'reason': 'level not found'
         }
 
-@app.post("/level/run", response_model=RunLevelResponse)
+@app.post("/api/level/run", response_model=RunLevelResponse)
 async def run_level(request: RunLevelRequest):
     level = levels.get(request.level_id)
     if not level:
