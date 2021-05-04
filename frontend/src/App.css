@@ -1,5 +1,24 @@
-canvas { 
-  /* height: 100vh; 
-  width: 100%; 
-  display: block; */
+canvas {
+  display: block;
+  overflow: auto;
+}
+
+.upperSpace {
+  height: 50px;
+}
+
+body {
+  background-color: rgb(5, 61, 99);
+}
+
+.container-row {
+  display: flex; /* or inline-flex */
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.container-column {
+  display: flex; /* or inline-flex */
+  flex-direction: column;
+  margin: 10px 10px 0px 10px;
 }

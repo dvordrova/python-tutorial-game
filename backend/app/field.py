@@ -1,10 +1,9 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
-from icecream import ic
 
 from app.award import Award
-from app.robot import Robot
+from app.robot import Robot, MOVEMENTS
 
 @dataclass(repr=False)
 class Field:
@@ -14,16 +13,22 @@ class Field:
     height: int = 5
 
     steps: int = 0
-    max_steps: int = 10
+    max_steps: int = 500
     state: str = 'run'
+
+    prepared_user_code: str = field(default='None', repr=False)
+    help_code: str = field(default='\nrobot.velocity = velocity', repr=False)
+
+    count_of_no_movements_cycles: int = 0
+    max_count_of_no_movements_cycles: int = 5
 
     @property
     def can_do_steps(self):
         return self.state == 'run' and self.steps < self.max_steps and \
+            self.count_of_no_movements_cycles < self.max_count_of_no_movements_cycles and \
             any(robot.movable for robot in self.robots)
     
     def _check_robot(self, robot: Robot):
-        ic(robot)
         if robot.x < 0 or robot.x >= self.width or \
             robot.y < 0 or robot.y >= self.height:
             robot.make_step_back()
@@ -39,6 +44,8 @@ class Field:
             else:
                 remained_awards.append(award)
         self.awards = remained_awards
+        if not self.awards:
+            self.state = 'stop'
     
     def _feel_sensors(self, robot: Robot):
         robot.sensors['up'] = robot.y == 0
@@ -56,26 +63,25 @@ class Field:
             if other_robot == (robot.x, robot.y + 1):
                 robot.sensors['down'] = True
 
-
-    def make_step(self):
+    def fill_sensors(self):
         for robot in self.robots:
             self._feel_sensors(robot)
+
+    def make_step(self):
+        was_movements = False
+        for robot in self.robots:
+            exec(
+                self.prepared_user_code + self.help_code,
+                {},
+                {'robot': robot, 'step': self.steps, 'velocity': robot.velocity, **MOVEMENTS}
+            )
             robot.make_step(self.steps)
             self._check_robot(robot)
+            if robot.x != robot.prev_x or robot.y != robot.prev_y:
+                was_movements = True
+        if not was_movements:
+            self.count_of_no_movements_cycles += 1
         self.steps += 1
-    
-    def __repr__(self):
-        res = ''
-        for y in range(self.height):
-            for x in range(self.width):
-                if any(robot == (x, y) for robot in self.robots):
-                    res += 'R'
-                elif any(a.x == x and a.y == y for a in self.awards):
-                    res += 'A'
-                else:
-                    res += '‧'
-            res += '\n'
-        return res
     
     @property
     def result(self):

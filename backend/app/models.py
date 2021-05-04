@@ -19,6 +19,9 @@ class Level(BaseModel):
     robots: List[Point]
     awards: List[Point]
 
+class GetLevelsInfoResponse(BaseModel):
+    count: int
+
 class GetLevelResponse(BaseModel):
     state: State
     level:Optional[Level]
@@ -32,8 +35,19 @@ class RunResult(str, Enum):
     win = 'win'
     lose = 'lose'
 
+class Sensors(BaseModel):
+    up: bool
+    down: bool
+    left: bool
+    right: bool
+
+class Robot(BaseModel):
+    x: int
+    y: int
+    sensors: Sensors
+
 class Step(BaseModel):
-    robots: List[Point]
+    robots: List[Robot]
     number: int
 
 class RunLevelResponse(BaseModel):

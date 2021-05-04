@@ -31,21 +31,11 @@ class Robot:
     prev_y = 0
     velocity: Velocity = NO_MOVEMENT
     movable: bool = True
-    prepared_user_code: str = field(default='None', repr=False)
-    help_code: str = field(default='\nrobot.velocity = velocity', repr=False)
     sensors: Dict = field(default_factory=dict)
 
     uuid: UUID = field(default_factory=uuid4, repr=False)
     
-    def _execute_user_code(self, step: int):
-        exec(
-            self.prepared_user_code + self.help_code,
-            {},
-            {'robot': self, 'step': step, 'velocity': self.velocity, **MOVEMENTS}
-        )
-    
     def make_step(self, step: int):
-        self._execute_user_code(step)
         if self.movable:
             self.prev_x = self.x
             self.prev_y = self.y
