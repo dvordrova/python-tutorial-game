@@ -14,6 +14,7 @@ class Point(BaseModel):
     y: int
 
 class Level(BaseModel):
+    id: int
     width: int
     height: int
     robots: List[Point]

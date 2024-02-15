@@ -6,7 +6,7 @@ from app.award import Award
 from app.field import Field
 from app.robot import Robot, NO_MOVEMENT
 from app.utils import validate
-from copy import copy
+from copy import copy, deepcopy
 
 MAX_LENGTH_OF_SOURCE_CODE = 1000
 
@@ -23,9 +23,11 @@ async def get_levels_info():
 @app.get("/api/level/{level_id}", response_model=GetLevelResponse)
 async def get_level(level_id: int):
     if level_id < len(levels):
+        level = deepcopy(levels[level_id])
+        level.update({'id': level_id})
         return {
             'state': 'success',
-            'level': levels[level_id]
+            'level': level
         }
     else:
         return {
@@ -43,7 +45,7 @@ async def run_level(request: RunLevelRequest):
             'state': 'error',
             'reason': 'level not found'
         }
-    level = Level(**levels[request.level_id])
+    level = Level(**levels[request.level_id], id=request.level_id)
 
     validate_result = validate(request.code)
     if not validate_result['ok']:
@@ -52,7 +54,7 @@ async def run_level(request: RunLevelRequest):
             'reason': validate_result['reason']
         }
 
-    
+
     field=Field(
         width=level.width,
         height=level.height,
@@ -85,7 +87,7 @@ async def run_level(request: RunLevelRequest):
                 'robots': [{'x': robot.x, 'y': robot.y} for robot in field.robots]
             }
             steps.append(step_record)
-    
+
         for i, robot in enumerate(field.robots):
             steps[-1]['robots'][i]['sensors'] = copy(robot.sensors)
 
