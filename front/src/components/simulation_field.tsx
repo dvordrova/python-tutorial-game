@@ -1,12 +1,13 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import styled from "styled-components";
 
-import { debounce, cloneDeep } from "lodash";
-import { Slider, Spin, Flex } from "antd";
+import { debounce } from "lodash";
+import { Slider, Spin, Flex, Radio, Typography } from "antd";
 
 import { ILevel, ISimulationStep } from "../utils/model";
-import { gapBeetween, slowness } from "../utils/constants";
 import { LevelDrawer } from "../utils/draw";
+
+const { Title } = Typography;
 
 // display: block;
 const SimulationCanvas = styled.canvas`
@@ -15,11 +16,26 @@ const SimulationCanvas = styled.canvas`
   width: 100%;
 `;
 
+const SlownessRadioGroup = styled(Radio.Group)`
+  margin-bottom: 16px;
+`;
+
+const SpeedTitle = styled(Title)`
+  display: inline;
+  margin-right: 8px;
+`;
+
 interface ISimulationFieldProps {
   level?: ILevel;
   simulationSteps?: ISimulationStep[];
   toggleSimulation: boolean;
 }
+
+const slownessOptions = [
+  { label: "x1", value: 50 / 1 },
+  { label: "x2", value: 50 / 2 },
+  { label: "x5", value: 50 / 5 },
+];
 
 export default function SimulationField({
   level,
@@ -30,7 +46,7 @@ export default function SimulationField({
   const [sliderRange, setSliderRange] = useState(0);
   const [runningSimulation, setRunningSimulation] = useState(false);
   const [simulationFrameStart, setSimulationFrameStart] = useState(0);
-  const [slownessLevel, setSlownessLevel] = useState(1);
+  const [slowness, setSlowness] = useState(50);
   const [sliderValue, setSliderValue] = useState(0);
   const [levelDrawer, setLevelDrawer] = useState<LevelDrawer>();
 
@@ -101,7 +117,7 @@ export default function SimulationField({
 
   useEffect(() => {
     console.debug("useEffect runningSimulation", {
-      slownessLevel,
+      slowness,
       drawSimulation,
       runningSimulation,
       simulationSteps,
@@ -122,9 +138,8 @@ export default function SimulationField({
       console.debug("render function called");
       frameCount++;
       let simulationStep =
-        simulationFrameStart + Math.floor(frameCount / slowness[slownessLevel]);
-      let percentOfStep =
-        (frameCount % slowness[slownessLevel]) / slowness[slownessLevel];
+        simulationFrameStart + Math.floor(frameCount / slowness);
+      let percentOfStep = (frameCount % slowness) / slowness;
       if (simulationStep < simulationSteps.length) {
         setSliderValue(simulationStep);
         drawSimulation(simulationStep, percentOfStep);
@@ -139,7 +154,7 @@ export default function SimulationField({
       window.cancelAnimationFrame(animationFrameId);
     };
   }, [
-    slownessLevel,
+    slowness,
     drawSimulation,
     runningSimulation,
     simulationSteps,
@@ -161,6 +176,10 @@ export default function SimulationField({
     [],
   );
 
+  const onSlownessChange = (e: any) => {
+    setSlowness(e.target.value);
+  };
+
   return (
     <>
       <Slider
@@ -169,6 +188,13 @@ export default function SimulationField({
         max={sliderRange}
         onChange={clickSlider}
         tooltip={{ open: false }}
+      />
+      <SpeedTitle level={4}>Скорость:</SpeedTitle>
+      <SlownessRadioGroup
+        options={slownessOptions}
+        onChange={onSlownessChange}
+        value={slowness}
+        optionType="button"
       />
       <Flex justify="center">
         <Spin tip="Loading..." spinning={spinning}>

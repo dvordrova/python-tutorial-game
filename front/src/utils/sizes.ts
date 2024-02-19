@@ -2,7 +2,7 @@ import { awardColor, cellColor, fieldColor } from "./constants";
 import { ILevel } from "./model";
 
 function getCanvasHeight(windowsHeight: number) {
-  return windowsHeight - 32 - 64 - 64.5;
+  return windowsHeight - 32 - 64 - 64.5 - 32;
 }
 
 function getCanvasWidth(windowsWidth: number) {
