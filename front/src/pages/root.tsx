@@ -1,15 +1,20 @@
 import React, { FC, useState, useEffect } from "react";
-
-import { Menu } from "antd";
-import SubMenu from "antd/lib/menu/SubMenu";
-
 import { Link } from "react-router-dom";
+import { Menu, Layout, Space } from "antd";
+import styled from "styled-components";
+
 import { getLevels } from "../service/http";
+
+const { Header, Footer, Sider, Content } = Layout;
 
 interface RootpageProps {
   children: React.ReactNode;
   levelId?: number;
 }
+
+const StyledHeader = styled(Header)`
+  padding-inline: 0px;
+`;
 
 export const Rootpage: FC<RootpageProps> = (props) => {
   const [menuItems, setMenuItems] = useState<JSX.Element[]>([]);
@@ -20,11 +25,9 @@ export const Rootpage: FC<RootpageProps> = (props) => {
       for (let i = 0; i < levels.count; ++i) {
         newMenuItems.push(
           <Menu.Item key={i}>
-            <p>
-              <Link reloadDocument to={`/level/${i}`}>
-                {i}
-              </Link>
-            </p>
+            <Link reloadDocument to={`/level/${i}`}>
+              {i}
+            </Link>
           </Menu.Item>,
         );
       }
@@ -32,27 +35,26 @@ export const Rootpage: FC<RootpageProps> = (props) => {
     });
   }, []);
 
-  if (props.levelId === undefined) {
-    return (
-      <>
-        <Menu mode="horizontal">
-          <SubMenu key="SubMenu" title="Уровни">
-            {menuItems}
-          </SubMenu>
-        </Menu>
-        {props.children}
-      </>
-    );
-  } else {
-    return (
-      <>
-        <Menu mode="horizontal" selectedKeys={[props.levelId.toString()]}>
-          <SubMenu key="SubMenu" title="Уровни">
-            {menuItems}
-          </SubMenu>
-        </Menu>
-        {props.children}
-      </>
-    );
-  }
+  return (
+    <Layout>
+      <StyledHeader>
+        {props.levelId !== undefined && (
+          <Menu mode="horizontal" selectedKeys={[props.levelId.toString()]}>
+            <Menu.SubMenu key="SubMenu" title="Уровни">
+              {menuItems}
+            </Menu.SubMenu>
+          </Menu>
+        )}
+        {props.levelId === undefined && (
+          <Menu mode="horizontal">
+            <Menu.SubMenu key="SubMenu" title="Уровни">
+              {menuItems}
+            </Menu.SubMenu>
+          </Menu>
+        )}
+      </StyledHeader>
+      <Content>{props.children}</Content>
+      <Footer> ©{new Date().getFullYear()} Created by Dmitry Bozhko</Footer>
+    </Layout>
+  );
 };

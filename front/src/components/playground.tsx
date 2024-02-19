@@ -13,17 +13,9 @@ import SimulationField from "./simulation_field";
 import Editor from "./editor";
 import { runLevel } from "../service/http";
 
-// const PlayGroundRowWrapper = styled.div`
-//   display: flex;
-//   flex-direction: row;
-//   flex-wrap: wrap;
-// `;
-
-// const PlayGroundColumnWrapper = styled.div`
-//   display: flex;
-//   flex-direction: column;
-//   margin: 10px 10px 0px 10px;
-// `;
+const StyledButton = styled(Button)`
+  margin-top: 10px;
+`;
 
 interface IPlayGroundProps {
   level?: ILevel;
@@ -71,6 +63,7 @@ export default function PlayGround({ level }: IPlayGroundProps) {
           // for mobile
           window.scrollTo(0, 0);
         }
+        setSimulationWasRun(true);
         setSimulationRunResult(data.result);
         setLoadingRun(false);
       });
@@ -86,6 +79,7 @@ export default function PlayGround({ level }: IPlayGroundProps) {
         md={{ flex: "62%" }}
         lg={{ flex: "62%" }}
         xl={{ flex: "62%" }}
+        style={{ padding: "0px 10px 0px 10px" }}
       >
         <SimulationField
           level={level}
@@ -94,17 +88,10 @@ export default function PlayGround({ level }: IPlayGroundProps) {
         />
       </Col>
 
-      <Col
-        xs={{ flex: "100%" }}
-        sm={{ flex: "100%" }}
-        md={{ flex: "18%" }}
-        lg={{ flex: "18%" }}
-        xl={{ flex: "18%" }}
-      >
+      <Col flex="auto" style={{ padding: "32px 10px 0px 10px" }}>
         <Editor code={code} setCode={setCode} />
-        <br />
         <Spin spinning={loadingRun}>
-          <Button
+          <StyledButton
             type="primary"
             htmlType="submit"
             shape="round"
@@ -115,7 +102,7 @@ export default function PlayGround({ level }: IPlayGroundProps) {
             {simulationWasRun && codeChanged === false && !runRequestFailed
               ? "Рестарт"
               : "Старт"}
-          </Button>
+          </StyledButton>
           {runRequestFailed && !!errorReason && (
             <>
               <br />

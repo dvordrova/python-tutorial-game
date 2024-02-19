@@ -16,6 +16,7 @@ interface ILevel {
   id: number;
   width: number;
   height: number;
+  // TODO: make it IRobot
   robots: Array<Point>;
   awards: Array<Point>;
 }
@@ -67,6 +68,8 @@ export type {
   IRunLevelRequest,
   ILevelDescription,
   ILevel,
+  IRobot,
+  Point,
 };
 
 export { SimulationRunResult, RequestState };

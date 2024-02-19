@@ -2,22 +2,22 @@ import { awardColor, cellColor, fieldColor } from "./constants";
 import { ILevel } from "./model";
 
 function getCanvasHeight(windowsHeight: number) {
-  return windowsHeight - 158;
+  return windowsHeight - 32 - 64 - 64.5;
 }
 
 function getCanvasWidth(windowsWidth: number) {
-  return windowsWidth > 680
-    ? (windowsWidth - 40) * (15 / 24)
+  return windowsWidth > 768
+    ? Math.floor((windowsWidth - 40) * 0.62)
     : windowsWidth - 20;
 }
 
 function getEditorHeight(windowsHeight: number) {
-  return windowsHeight / 2;
+  return windowsHeight - 32 - 64 - 64.5 - 32;
 }
 
 function getEditorWidth(windowsWidth: number) {
-  return windowsWidth > 680
-    ? (windowsWidth - 40) * (9 / 24)
+  return windowsWidth > 768
+    ? Math.floor((windowsWidth - 40) * 0.37)
     : windowsWidth - 20;
 }
 
