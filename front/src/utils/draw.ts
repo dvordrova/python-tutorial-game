@@ -8,6 +8,11 @@ import robotImage from "../assets/vacuum-cleaner-robot.png";
 const devicePixelRatio =
   typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
 
+const topSensorY = 199;
+const bottomSensorY = 800;
+const leftSensorX = 204;
+const rightSensorX = 868;
+
 class LevelDrawer {
   ctx?: CanvasRenderingContext2D | null;
   robotImage: HTMLImageElement;
@@ -135,7 +140,7 @@ class LevelDrawer {
     if (!this.ctx) {
       return;
     }
-    let radius = (this.cellSize * 22) / 1080;
+    let radius = (this.cellSize * 22) / this.robotImage.width;
     for (let i = 1; i <= 3; i++) {
       let opacity = 0.5;
       this.ctx.fillStyle = "rgba(200, 0, 0, " + opacity + ")";
@@ -148,29 +153,41 @@ class LevelDrawer {
 
   drawSensorUp(left_x: number, top_y: number) {
     this.drawSensor(
-      left_x + (this.cellSize * 537) / 1080,
-      top_y + (this.cellSize * 199) / 1080,
+      left_x +
+        (this.cellSize * (leftSensorX + rightSensorX)) /
+          2 /
+          this.robotImage.width,
+      top_y + (this.cellSize * topSensorY) / this.robotImage.width,
     );
   }
 
   drawSensorRight(left_x: number, top_y: number) {
     this.drawSensor(
-      left_x + (this.cellSize * 868) / 1080,
-      top_y + (this.cellSize * 500.5) / 1080,
+      left_x + (this.cellSize * rightSensorX) / this.robotImage.width,
+      top_y +
+        (this.cellSize * (topSensorY + bottomSensorY)) /
+          2 /
+          this.robotImage.width,
     );
   }
 
   drawSensorDown(left_x: number, top_y: number) {
     this.drawSensor(
-      left_x + (this.cellSize * 537) / 1080,
-      top_y + (this.cellSize * 800) / 1080,
+      left_x +
+        (this.cellSize * (leftSensorX + rightSensorX)) /
+          2 /
+          this.robotImage.width,
+      top_y + (this.cellSize * bottomSensorY) / this.robotImage.width,
     );
   }
 
   drawSensorLeft(left_x: number, top_y: number) {
     this.drawSensor(
-      left_x + (this.cellSize * 204) / 1080,
-      top_y + (this.cellSize * 500.5) / 1080,
+      left_x + (this.cellSize * leftSensorX) / this.robotImage.width,
+      top_y +
+        (this.cellSize * (topSensorY + bottomSensorY)) /
+          2 /
+          this.robotImage.width,
     );
   }
 
