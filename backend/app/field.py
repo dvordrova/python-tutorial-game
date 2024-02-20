@@ -86,9 +86,15 @@ class Field:
             self._feel_sensors(robot)
 
     def make_step(self):
+        """
+        determinism
+        order of robots araund a cell will be like this
+         1
+        2 3
+         4
+        """
         was_movements = False
-        new_robots = deepcopy(self.robots)
-        for i, robot in enumerate(new_robots):
+        for robot in sorted(self.robots, key=lambda robot: (robot.x, robot.y)):
             exec(
                 self.prepared_user_code + self.help_code,
                 {},
@@ -98,7 +104,6 @@ class Field:
             self._check_robot(robot)
             if robot.x != robot.prev_x or robot.y != robot.prev_y:
                 was_movements = True
-        self.robots = new_robots
         if not was_movements:
             self.count_of_no_movements_cycles += 1
         else:
