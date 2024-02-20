@@ -22,7 +22,7 @@ const SlownessRadioGroup = styled(Radio.Group)`
 
 const SpeedTitle = styled(Title)`
   display: inline;
-  margin-right: 8px;
+  margin-right: 16px;
 `;
 
 interface ISimulationFieldProps {
@@ -189,7 +189,7 @@ export default function SimulationField({
         onChange={clickSlider}
         tooltip={{ open: false }}
       />
-      <SpeedTitle level={4}>Скорость:</SpeedTitle>
+      <SpeedTitle level={4}>Скорость</SpeedTitle>
       <SlownessRadioGroup
         options={slownessOptions}
         onChange={onSlownessChange}
