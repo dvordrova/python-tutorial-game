@@ -1,5 +1,5 @@
 import { awardColor, cellColor, fieldColor, gapBeetween } from "./constants";
-import { ILevel, IRobot, Point } from "./model";
+import { ILevel, IRobot } from "./model";
 
 import { getCanvasWidth, getCanvasHeight } from "./sizes";
 
@@ -191,7 +191,32 @@ class LevelDrawer {
     );
   }
 
-  drawRobots(robots: Point[]) {
+  drawRobot(robot: IRobot) {
+    if (!this.ctx) {
+      return;
+    }
+    this.ctx.drawImage(
+      this.robotImage,
+      robot.x,
+      robot.y,
+      this.cellSize,
+      this.cellSize,
+    );
+    if (robot.sensors.up) {
+      this.drawSensorUp(robot.x, robot.y);
+    }
+    if (robot.sensors.right) {
+      this.drawSensorRight(robot.x, robot.y);
+    }
+    if (robot.sensors.down) {
+      this.drawSensorDown(robot.x, robot.y);
+    }
+    if (robot.sensors.left) {
+      this.drawSensorLeft(robot.x, robot.y);
+    }
+  }
+
+  drawRobots(robots: IRobot[]) {
     if (!this.ctx) {
       console.debug("drawRobots no ctx");
       return;
@@ -200,7 +225,7 @@ class LevelDrawer {
     for (let i = 0; i < robots.length; i++) {
       let x = robots[i].x * (this.cellSize + gapBeetween);
       let y = robots[i].y * (this.cellSize + gapBeetween);
-      this.ctx.drawImage(this.robotImage, x, y, this.cellSize, this.cellSize);
+      this.drawRobot({ x, y, sensors: robots[i].sensors });
     }
   }
 
@@ -221,32 +246,21 @@ class LevelDrawer {
       let y =
         cur_robot.y * (this.cellSize + gapBeetween) * (1 - percentOfStep) +
         next_robot.y * (this.cellSize + gapBeetween) * percentOfStep;
-      this.ctx.drawImage(this.robotImage, x, y, this.cellSize, this.cellSize);
-
-      if (
-        cur_robot.sensors.up &&
-        (percentOfStep < 0.1 || next_robot.sensors.up)
-      ) {
-        this.drawSensorUp(x, y);
-      }
-      if (
-        cur_robot.sensors.right &&
-        (percentOfStep < 0.1 || next_robot.sensors.right)
-      ) {
-        this.drawSensorRight(x, y);
-      }
-      if (
-        cur_robot.sensors.down &&
-        (percentOfStep < 0.1 || next_robot.sensors.down)
-      ) {
-        this.drawSensorDown(x, y);
-      }
-      if (
-        cur_robot.sensors.left &&
-        (percentOfStep < 0.1 || next_robot.sensors.left)
-      ) {
-        this.drawSensorLeft(x, y);
-      }
+      let sensors = {
+        up:
+          (cur_robot.sensors.up && percentOfStep < 0.1) ||
+          next_robot.sensors.up,
+        right:
+          (cur_robot.sensors.right && percentOfStep < 0.1) ||
+          next_robot.sensors.right,
+        left:
+          (cur_robot.sensors.left && percentOfStep < 0.1) ||
+          next_robot.sensors.left,
+        down:
+          (cur_robot.sensors.down && percentOfStep < 0.1) ||
+          next_robot.sensors.down,
+      };
+      this.drawRobot({ x, y, sensors });
     }
   }
 }

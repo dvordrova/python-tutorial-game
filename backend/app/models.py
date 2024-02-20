@@ -4,7 +4,6 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
-
 class State(str, Enum):
     error = 'error'
     success = 'success'
@@ -13,11 +12,22 @@ class Point(BaseModel):
     x: int
     y: int
 
+class Sensors(BaseModel):
+    up: bool
+    down: bool
+    left: bool
+    right: bool
+
+class Robot(BaseModel):
+    x: int
+    y: int
+    sensors: Sensors
+
 class Level(BaseModel):
     id: int
     width: int
     height: int
-    robots: List[Point]
+    robots: List[Robot]
     awards: List[Point]
 
 class GetLevelsInfoResponse(BaseModel):
@@ -35,17 +45,6 @@ class RunLevelRequest(BaseModel):
 class RunResult(str, Enum):
     win = 'win'
     lose = 'lose'
-
-class Sensors(BaseModel):
-    up: bool
-    down: bool
-    left: bool
-    right: bool
-
-class Robot(BaseModel):
-    x: int
-    y: int
-    sensors: Sensors
 
 class Step(BaseModel):
     robots: List[Robot]

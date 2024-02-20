@@ -19,21 +19,33 @@ async def get_levels_info():
         'count': len(levels)
     }
 
+def init_robot_sensors(level: dict):
+    robots_coords = set()
+    for robot in level['robots']:
+        robots_coords.add((robot['x'], robot['y']))
+    for robot in level['robots']:
+        sensors = {
+            'up': (robot['x'], robot['y'] - 1) in robots_coords or robot['y'] == 0,
+            'down': (robot['x'], robot['y'] + 1) in robots_coords or robot['y'] == level['height'] - 1,
+            'left': (robot['x'] - 1, robot['y']) in robots_coords or robot['x'] == 0,
+            'right': (robot['x'] + 1, robot['y']) in robots_coords or robot['x'] == level['width'] - 1
+        }
+        robot.update({'sensors': sensors})
 
 @app.get("/api/level/{level_id}", response_model=GetLevelResponse)
 async def get_level(level_id: int):
-    if level_id < len(levels):
-        level = deepcopy(levels[level_id])
-        level.update({'id': level_id})
-        return {
-            'state': 'success',
-            'level': level
-        }
-    else:
+    if level_id >= len(levels):
         return {
             'state': 'error',
             'reason': 'level not found'
         }
+    level = deepcopy(levels[level_id])
+    level.update({'id': level_id})
+    init_robot_sensors(level)
+    return {
+        'state': 'success',
+        'level': level
+    }
 
 @app.post("/api/level/run", response_model=RunLevelResponse)
 async def run_level(request: RunLevelRequest):
@@ -45,7 +57,11 @@ async def run_level(request: RunLevelRequest):
             'state': 'error',
             'reason': 'level not found'
         }
-    level = Level(**levels[request.level_id], id=request.level_id)
+
+    level_dict = deepcopy(levels[request.level_id])
+    level_dict.update({'id': request.level_id})
+    init_robot_sensors(level_dict)
+    level = Level(**level_dict)
 
     validate_result = validate(request.code)
     if not validate_result['ok']:
@@ -88,6 +104,7 @@ async def run_level(request: RunLevelRequest):
             }
             steps.append(step_record)
 
+        field.fill_sensors()
         for i, robot in enumerate(field.robots):
             steps[-1]['robots'][i]['sensors'] = copy(robot.sensors)
 

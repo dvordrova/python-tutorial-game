@@ -7,7 +7,7 @@ enum RequestState {
   Success = "success",
 }
 
-interface Point {
+interface IPoint {
   x: number;
   y: number;
 }
@@ -16,9 +16,8 @@ interface ILevel {
   id: number;
   width: number;
   height: number;
-  // TODO: make it IRobot
-  robots: Array<Point>;
-  awards: Array<Point>;
+  robots: IRobot[];
+  awards: IPoint[];
 }
 
 interface ILevelDescription {
@@ -69,7 +68,7 @@ export type {
   ILevelDescription,
   ILevel,
   IRobot,
-  Point,
+  IPoint,
 };
 
 export { SimulationRunResult, RequestState };
