@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from typing import Set, Tuple
+
 from app.levels import levels
 from app.models import Level, GetLevelResponse, RunLevelRequest, RunLevelResponse, GetLevelsInfoResponse
 from app.award import Award
@@ -21,14 +23,36 @@ async def get_levels_info():
 
 def init_robot_sensors(level: dict):
     robots_coords = set()
+    vertical_walls = { (wall['x'], wall['y']) for wall in level['walls'] if wall['type'] == 'vertical' }
+    horizontal_walls = { (wall['x'], wall['y']) for wall in level['walls'] if wall['type'] == 'horizontal'}
     for robot in level['robots']:
         robots_coords.add((robot['x'], robot['y']))
     for robot in level['robots']:
+        up = (
+            (robot['x'], robot['y'] - 1) in robots_coords
+            or robot['y'] == 0
+            or (robot['x'], robot['y']) in horizontal_walls
+        )
+        down = (
+            (robot['x'], robot['y'] + 1) in robots_coords
+            or robot['y'] == level['height'] - 1
+            or (robot['x'], robot['y'] + 1) in horizontal_walls
+        )
+        left = (
+            (robot['x'] - 1, robot['y']) in robots_coords
+            or robot['x'] == 0 or
+            (robot['x'], robot['y']) in vertical_walls
+        )
+        right = (
+            (robot['x'] + 1, robot['y']) in robots_coords
+            or robot['x'] == level['width'] - 1
+            or (robot['x'] + 1, robot['y']) in vertical_walls
+        )
         sensors = {
-            'up': (robot['x'], robot['y'] - 1) in robots_coords or robot['y'] == 0,
-            'down': (robot['x'], robot['y'] + 1) in robots_coords or robot['y'] == level['height'] - 1,
-            'left': (robot['x'] - 1, robot['y']) in robots_coords or robot['x'] == 0,
-            'right': (robot['x'] + 1, robot['y']) in robots_coords or robot['x'] == level['width'] - 1
+            'up': up,
+            'down': down,
+            'left': left,
+            'right': right,
         }
         robot.update({'sensors': sensors})
 
@@ -81,6 +105,8 @@ async def run_level(request: RunLevelRequest):
         awards=[
             Award(r.x, r.y) for r in level.awards
         ],
+        vertical_walls={(w.x, w.y) for w in level.walls if w.type == 'vertical'},
+        horizontal_walls={(w.x, w.y) for w in level.walls if w.type == 'horizontal'},
         prepared_user_code=request.code
     )
     steps = [

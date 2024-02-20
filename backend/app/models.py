@@ -23,12 +23,22 @@ class Robot(BaseModel):
     y: int
     sensors: Sensors
 
+class WallType(str, Enum):
+    vertical = 'vertical'
+    horizontal = 'horizontal'
+
+class Wall(BaseModel):
+    x: int
+    y: int
+    type: WallType
+
 class Level(BaseModel):
     id: int
     width: int
     height: int
     robots: List[Robot]
     awards: List[Point]
+    walls: List[Wall]
 
 class GetLevelsInfoResponse(BaseModel):
     count: int

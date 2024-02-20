@@ -1,5 +1,5 @@
 import { awardColor, cellColor, fieldColor, gapBeetween } from "./constants";
-import { ILevel, IRobot } from "./model";
+import { ILevel, IRobot, IWall } from "./model";
 
 import { getCanvasWidth, getCanvasHeight } from "./sizes";
 
@@ -70,6 +70,7 @@ class LevelDrawer {
     this.drawLevel();
     if (this.level) {
       this.drawRobots(this.level.robots);
+      this.drawWalls(this.level.walls);
     }
   }
 
@@ -226,6 +227,43 @@ class LevelDrawer {
       let x = robots[i].x * (this.cellSize + gapBeetween);
       let y = robots[i].y * (this.cellSize + gapBeetween);
       this.drawRobot({ x, y, sensors: robots[i].sensors });
+    }
+  }
+
+  drawWalls(walls: IWall[]) {
+    if (!this.ctx) {
+      console.debug("drawWalls no ctx");
+      return;
+    }
+    console.debug("drawWalls");
+    this.ctx.strokeStyle = "#ff0000"; // Line color
+    this.ctx.lineWidth = 5; // Line width
+    for (let i = 0; i < walls.length; i++) {
+      if (walls[i].type == "horizontal") {
+        this.ctx.beginPath();
+        this.ctx.moveTo(
+          walls[i].x * (this.cellSize + gapBeetween),
+          walls[i].y * (this.cellSize + gapBeetween),
+        );
+        this.ctx.lineTo(
+          (walls[i].x + 1) * (this.cellSize + gapBeetween),
+          walls[i].y * (this.cellSize + gapBeetween),
+        );
+        this.ctx.stroke();
+      } else if (walls[i].type == "vertical") {
+        this.ctx.beginPath();
+        this.ctx.moveTo(
+          walls[i].x * (this.cellSize + gapBeetween),
+          walls[i].y * (this.cellSize + gapBeetween),
+        );
+        this.ctx.lineTo(
+          walls[i].x * (this.cellSize + gapBeetween),
+          (walls[i].y + 1) * (this.cellSize + gapBeetween),
+        );
+        this.ctx.stroke();
+      } else {
+        console.debug("drawWalls unknown wall type");
+      }
     }
   }
 

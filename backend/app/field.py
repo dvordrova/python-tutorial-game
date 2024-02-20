@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Set, Tuple
 
 
 from app.award import Award
@@ -11,28 +11,41 @@ class Field:
     awards: List[Award]
     width: int = 5
     height: int = 5
+    initial_count_of_awards: int = field(init=False)
 
     steps: int = 0
     max_steps: int = 500
     state: str = 'run'
-
+    horizontal_walls: Set[Tuple[int, int]] = field(default_factory=set)
+    vertical_walls: Set[Tuple[int, int]] = field(default_factory=set)
     prepared_user_code: str = field(default='None', repr=False)
     help_code: str = field(default='\nrobot.velocity = velocity', repr=False)
 
     count_of_no_movements_cycles: int = 0
     max_count_of_no_movements_cycles: int = 5
 
+    def __post_init__(self):
+        self.initial_count_of_awards = len(self.awards)
+
     @property
     def can_do_steps(self):
         return self.state == 'run' and self.steps < self.max_steps and \
             self.count_of_no_movements_cycles < self.max_count_of_no_movements_cycles and \
             any(robot.movable for robot in self.robots)
-    
+
     def _check_robot(self, robot: Robot):
         if robot.x < 0 or robot.x >= self.width or \
             robot.y < 0 or robot.y >= self.height:
             robot.make_step_back()
             return
+        # if step from prev possiotion was not possible through the wall - make step back
+        if (
+            ((robot.prev_x, robot.prev_y) in self.horizontal_walls and robot.y < robot.prev_y)
+            or ((robot.prev_x, robot.prev_y) in self.vertical_walls and robot.x < robot.prev_x)
+            or ((robot.x, robot.y) in self.horizontal_walls and robot.y > robot.prev_y)
+            or ((robot.x, robot.y) in self.vertical_walls and robot.x > robot.prev_x)
+        ):
+            robot.make_step_back()
         for other_robot in self.robots:
             if robot.collides(other_robot):
                 robot.make_step_back()
@@ -44,14 +57,14 @@ class Field:
             else:
                 remained_awards.append(award)
         self.awards = remained_awards
-        if not self.awards:
+        if not self.awards and self.initial_count_of_awards > 0:
             self.state = 'stop'
-    
+
     def _feel_sensors(self, robot: Robot):
-        robot.sensors['up'] = robot.y == 0
-        robot.sensors['right'] = robot.x == self.width - 1
-        robot.sensors['down'] = robot.y == self.height - 1
-        robot.sensors['left'] = robot.x == 0
+        robot.sensors['up'] = robot.y == 0 or (robot.x, robot.y) in self.horizontal_walls
+        robot.sensors['right'] = robot.x == self.width - 1 or (robot.x + 1, robot.y) in self.vertical_walls
+        robot.sensors['down'] = robot.y == self.height - 1 or (robot.x, robot.y + 1) in self.horizontal_walls
+        robot.sensors['left'] = robot.x == 0 or (robot.x, robot.y) in self.vertical_walls
 
         for other_robot in self.robots:
             if other_robot == (robot.x - 1, robot.y):
@@ -82,7 +95,7 @@ class Field:
         if not was_movements:
             self.count_of_no_movements_cycles += 1
         self.steps += 1
-    
+
     @property
     def result(self):
         if self.awards:

@@ -6,10 +6,20 @@ enum RequestState {
   Error = "error",
   Success = "success",
 }
+enum WallType {
+  Vertical = "vertical",
+  Horizontal = "horizontal",
+}
 
 interface IPoint {
   x: number;
   y: number;
+}
+
+interface IWall {
+  x: number;
+  y: number;
+  type: WallType;
 }
 
 interface ILevel {
@@ -18,6 +28,7 @@ interface ILevel {
   height: number;
   robots: IRobot[];
   awards: IPoint[];
+  walls: IWall[];
 }
 
 interface ILevelDescription {
@@ -69,6 +80,7 @@ export type {
   ILevel,
   IRobot,
   IPoint,
+  IWall,
 };
 
 export { SimulationRunResult, RequestState };

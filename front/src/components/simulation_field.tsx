@@ -95,6 +95,9 @@ export default function SimulationField({
         return;
       }
       levelDrawer.drawLevel();
+      if (level?.walls) {
+        levelDrawer.drawWalls(level.walls);
+      }
 
       if (simulationSteps === undefined) {
         return;
