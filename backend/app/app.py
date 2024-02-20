@@ -105,6 +105,7 @@ async def run_level(request: RunLevelRequest):
         awards=[
             Award(r.x, r.y) for r in level.awards
         ],
+        wincondition_check=level_dict['wincondition_check'],
         vertical_walls={(w.x, w.y) for w in level.walls if w.type == 'vertical'},
         horizontal_walls={(w.x, w.y) for w in level.walls if w.type == 'horizontal'},
         prepared_user_code=request.code

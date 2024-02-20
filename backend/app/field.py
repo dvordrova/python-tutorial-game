@@ -1,25 +1,29 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import List, Set, Tuple
-
+from typing import List, Set, Tuple, Callable
 
 from app.award import Award
 from app.robot import Robot, MOVEMENTS
+
 
 @dataclass(repr=False)
 class Field:
     robots: List[Robot]
     awards: List[Award]
+    wincondition_check: Callable
     width: int = 5
     height: int = 5
     initial_count_of_awards: int = field(init=False)
 
     steps: int = 0
-    max_steps: int = 500
+    max_steps: int = 150
     state: str = 'run'
     horizontal_walls: Set[Tuple[int, int]] = field(default_factory=set)
     vertical_walls: Set[Tuple[int, int]] = field(default_factory=set)
     prepared_user_code: str = field(default='None', repr=False)
     help_code: str = field(default='\nrobot.velocity = velocity', repr=False)
+
+    filled_sensors: Set[Tuple[bool, bool, bool, bool]] = field(default_factory=set)
 
     count_of_no_movements_cycles: int = 0
     max_count_of_no_movements_cycles: int = 5
@@ -57,7 +61,7 @@ class Field:
             else:
                 remained_awards.append(award)
         self.awards = remained_awards
-        if not self.awards and self.initial_count_of_awards > 0:
+        if self.wincondition_check(awards=self.awards, filled_sensors=self.filled_sensors):
             self.state = 'stop'
 
     def _feel_sensors(self, robot: Robot):
@@ -75,6 +79,7 @@ class Field:
                 robot.sensors['up'] = True
             if other_robot == (robot.x, robot.y + 1):
                 robot.sensors['down'] = True
+        self.filled_sensors.add((robot.sensors['up'], robot.sensors['right'], robot.sensors['down'], robot.sensors['left']))
 
     def fill_sensors(self):
         for robot in self.robots:
@@ -82,7 +87,8 @@ class Field:
 
     def make_step(self):
         was_movements = False
-        for robot in self.robots:
+        new_robots = deepcopy(self.robots)
+        for i, robot in enumerate(new_robots):
             exec(
                 self.prepared_user_code + self.help_code,
                 {},
@@ -92,13 +98,16 @@ class Field:
             self._check_robot(robot)
             if robot.x != robot.prev_x or robot.y != robot.prev_y:
                 was_movements = True
+        self.robots = new_robots
         if not was_movements:
             self.count_of_no_movements_cycles += 1
+        else:
+            self.count_of_no_movements_cycles = 0
         self.steps += 1
 
     @property
     def result(self):
-        if self.awards:
-            return 'lose'
-        else:
+        if self.wincondition_check(awards=self.awards, filled_sensors=self.filled_sensors):
             return 'win'
+        else:
+            return 'lose'
