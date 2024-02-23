@@ -1,6 +1,5 @@
-import React, { lazy, FC, ComponentType } from "react";
-import { Routes, Route } from "react-router-dom";
-import { retryImport } from "../utils/retry";
+import React, { lazy, FC } from "react";
+import { Routes, Route, useParams } from "react-router-dom";
 
 const HomePage = lazy(() => import("../pages/home"));
 const LevelPage = lazy(() => import("../pages/level"));
@@ -17,7 +16,10 @@ const AppRoutes: FC = () => {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/level/:levelIdFromPath" element={<LevelPage />} />
+      <Route
+        path="/level/:levelIdFromPath"
+        element={<LevelPage key={useParams().levelIdFromPath} />}
+      />
       {/* TODO: add next pages
         <Route path="/help" element={<HelpPage />} />
         <Route path="/login" element={<LoginPage />} />

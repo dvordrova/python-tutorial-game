@@ -52,37 +52,23 @@ export default function SimulationField({
 
   // level drawer setters
   useEffect(() => {
-    setLevelDrawer(new LevelDrawer(canvasRef));
-  }, [canvasRef]);
-
-  useEffect(() => {
-    if (levelDrawer) {
-      levelDrawer.setLevel(level);
+    setLevelDrawer(new LevelDrawer(canvasRef, level));
+    if (toggleSimulation) {
+      setRunningSimulation(false);
+      setSimulationFrameStart(0);
+      setSliderValue(0);
     }
-  }, [level]);
-  const updateSize = useCallback(
-    debounce(() => {
-      if (levelDrawer !== undefined) {
-        levelDrawer.updateCanvasSize();
-      }
-    }, 300),
-    [levelDrawer],
-  );
-
+  }, [canvasRef, level, toggleSimulation]);
+  const updateSize = debounce(() => {
+    if (levelDrawer !== undefined) {
+      levelDrawer.updateCanvasSize();
+    }
+  }, 300);
   useEffect(() => {
     setSliderRange(simulationSteps ? simulationSteps.length - 1 : 0);
     setSimulationFrameStart(0);
     setRunningSimulation(simulationSteps !== undefined);
   }, [simulationSteps, level, toggleSimulation]);
-
-  useEffect(() => {
-    if (!levelDrawer) {
-      return;
-    }
-    levelDrawer.setLevel(level);
-  }, [level]);
-
-  const [spinning, setSpinning] = useState(true);
 
   useEffect(() => {
     window.addEventListener("resize", updateSize);
@@ -115,7 +101,7 @@ export default function SimulationField({
         percentOfStep,
       );
     },
-    [level, simulationSteps],
+    [level, levelDrawer, simulationSteps],
   );
 
   useEffect(() => {
@@ -165,19 +151,11 @@ export default function SimulationField({
     toggleSimulation,
   ]);
 
-  useEffect(() => {
-    setRunningSimulation(false);
-    setSpinning(level === undefined);
-  }, [level]);
-
-  const clickSlider = useCallback(
-    debounce((value) => {
-      setSliderValue(value);
-      setSimulationFrameStart(value);
-      setRunningSimulation(true);
-    }, 300),
-    [],
-  );
+  const clickSlider = debounce((value) => {
+    setSliderValue(value);
+    setSimulationFrameStart(value);
+    setRunningSimulation(true);
+  }, 300);
 
   const onSlownessChange = (e: any) => {
     setSlowness(e.target.value);
@@ -200,7 +178,7 @@ export default function SimulationField({
         optionType="button"
       />
       <Flex justify="center">
-        <Spin tip="Loading..." spinning={spinning}>
+        <Spin tip="Loading..." spinning={level === undefined}>
           <SimulationCanvas ref={canvasRef} />
         </Spin>
       </Flex>

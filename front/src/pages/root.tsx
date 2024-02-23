@@ -1,11 +1,11 @@
 import React, { FC, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, Layout, Space } from "antd";
+import { Menu, Layout } from "antd";
 import styled from "styled-components";
 
 import { getLevels } from "../service/http";
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Header, Footer, Content } = Layout;
 
 interface RootpageProps {
   children: React.ReactNode;
@@ -25,9 +25,7 @@ export const Rootpage: FC<RootpageProps> = (props) => {
       for (let i = 0; i < levels.count; ++i) {
         newMenuItems.push(
           <Menu.Item key={i}>
-            <Link reloadDocument to={`/level/${i}`}>
-              {i}
-            </Link>
+            <Link to={`/level/${i}`}>{i}</Link>
           </Menu.Item>,
         );
       }

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useParams } from "react-router-dom";
 import { ILevel } from "../utils/model";
@@ -10,11 +10,7 @@ import PlayGround from "../components/playground";
 export default function LevelPage() {
   let { levelIdFromPath } = useParams();
   const [level, setLevel] = useState<ILevel>();
-  const [levelId, setLevelId] = useState<number>();
-
-  useEffect(() => {
-    setLevelId(parseInt(levelIdFromPath || "0"));
-  }, [levelIdFromPath]);
+  const levelId = parseInt(levelIdFromPath || "0");
 
   useEffect(() => {
     setLevel(undefined);
@@ -32,7 +28,7 @@ export default function LevelPage() {
 
   return (
     <Rootpage levelId={levelId}>
-      <PlayGround level={level} />
+      <PlayGround level={level} key={level?.id} />
     </Rootpage>
   );
 }

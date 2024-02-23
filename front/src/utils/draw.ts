@@ -102,6 +102,7 @@ class LevelDrawer {
 
   drawLevel() {
     if (!this.ctx || !this.level) {
+      console.log("no ctx or level");
       return;
     }
     this.ctx.clearRect(0, 0, this.width, this.height);
@@ -239,7 +240,7 @@ class LevelDrawer {
     this.ctx.strokeStyle = "#ff0000"; // Line color
     this.ctx.lineWidth = 5; // Line width
     for (let i = 0; i < walls.length; i++) {
-      if (walls[i].type == "horizontal") {
+      if (walls[i].type === "horizontal") {
         this.ctx.beginPath();
         this.ctx.moveTo(
           walls[i].x * (this.cellSize + gapBeetween),
@@ -250,7 +251,7 @@ class LevelDrawer {
           walls[i].y * (this.cellSize + gapBeetween),
         );
         this.ctx.stroke();
-      } else if (walls[i].type == "vertical") {
+      } else if (walls[i].type === "vertical") {
         this.ctx.beginPath();
         this.ctx.moveTo(
           walls[i].x * (this.cellSize + gapBeetween),

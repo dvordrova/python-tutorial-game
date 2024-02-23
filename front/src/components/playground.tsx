@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 import { Row, Col, Button, Spin, Card, Progress } from "antd";
 
@@ -24,7 +24,9 @@ interface IPlayGroundProps {
 export default function PlayGround({ level }: IPlayGroundProps) {
   const [loadingRun, setLoadingRun] = useState(false);
   const [errorReason, setErrorReason] = useState<string>();
-  const [code, setCode] = useState(localStorage.getItem("code") || "");
+  const [code, setCode] = useState(
+    localStorage.getItem(`code-${level?.id}`) || "",
+  );
   const [codeChanged, setCodeChanged] = useState(true);
   const [simulationRunResult, setSimulationRunResult] =
     useState<SimulationRunResult>();
@@ -33,14 +35,18 @@ export default function PlayGround({ level }: IPlayGroundProps) {
   const [toggleSimulation, setToggleSimulation] = useState(false);
   const [simulationWasRun, setSimulationWasRun] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem("code", code);
-    setCodeChanged(true);
-  }, [code]);
+  const changeCode = useCallback(
+    (newCode: string) => {
+      setCode(newCode);
+      setCodeChanged(true);
+      localStorage.setItem(`code-${level?.id}`, newCode);
+    },
+    [level?.id],
+  );
 
   const handleClick = useCallback(
     (_: any) => {
-      if (level == undefined) {
+      if (level === undefined) {
         return;
       }
       if (!codeChanged) {
@@ -82,6 +88,7 @@ export default function PlayGround({ level }: IPlayGroundProps) {
         style={{ padding: "0px 10px 0px 10px" }}
       >
         <SimulationField
+          key={level?.id}
           level={level}
           simulationSteps={simulationSteps}
           toggleSimulation={toggleSimulation}
@@ -89,7 +96,7 @@ export default function PlayGround({ level }: IPlayGroundProps) {
       </Col>
 
       <Col flex="auto" style={{ padding: "32px 10px 0px 10px" }}>
-        <Editor code={code} setCode={setCode} />
+        <Editor code={code} setCode={changeCode} />
         <Spin spinning={loadingRun}>
           <StyledButton
             type="primary"

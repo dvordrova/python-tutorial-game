@@ -20,13 +20,10 @@ export default function Editor({ code, setCode }: EdirotProps) {
   const [width, setWidth] = useState<number>(getEditorWidth(window.innerWidth));
   const [editorLoaded, setEditorLoaded] = useState(false);
 
-  const updateSize = useCallback(
-    debounce(() => {
-      setWidth(getEditorWidth(window.innerWidth));
-      setHeight(getEditorHeight(window.innerHeight));
-    }, 300),
-    [],
-  );
+  const updateSize = debounce(() => {
+    setWidth(getEditorWidth(window.innerWidth));
+    setHeight(getEditorHeight(window.innerHeight));
+  }, 300);
 
   const handleCodeChange = useCallback(
     (value: string, _: any) => {
@@ -39,7 +36,7 @@ export default function Editor({ code, setCode }: EdirotProps) {
     console.log("updateSize editor", updateSize);
     window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
-  }, []);
+  }, [updateSize]);
 
   return (
     <>
