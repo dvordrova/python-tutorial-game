@@ -181,16 +181,6 @@ export default function SimulationField({
     setSlowness(e.target.value);
   };
 
-  useEffect(() => {
-    const width = window.innerWidth * devicePixelRatio;
-    const height = window.innerHeight * devicePixelRatio;
-
-    if (canvasRef.current) {
-      canvasRef.current.width = width;
-      canvasRef.current.height = height;
-    }
-  }, [canvasRef]);
-
   return (
     <>
       <Slider
@@ -208,9 +198,9 @@ export default function SimulationField({
         optionType="button"
       />
       <Flex justify="center">
-        {/* <Spin tip="Loading..." spinning={level === undefined}> */}
-        <SimulationCanvas ref={canvasRef} />
-        {/* </Spin> */}
+        <Spin tip="Loading..." spinning={level === undefined}>
+          <SimulationCanvas ref={canvasRef} />
+        </Spin>
       </Flex>
     </>
   );
