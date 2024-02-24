@@ -5,9 +5,6 @@ import { getCanvasWidth, getCanvasHeight } from "./sizes";
 
 import robotImage from "../assets/vacuum-cleaner-robot.png";
 
-const devicePixelRatio =
-  typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-
 const topSensorY = 199;
 const bottomSensorY = 800;
 const leftSensorX = 204;
@@ -26,7 +23,8 @@ class LevelDrawer {
     this.robotImage = new Image();
     this.robotImage.src = robotImage;
     this.robotImage.onload = () => {
-      this.redraw();
+      this.updateCanvasSize();
+      // this.redraw();
     };
     this.level = level;
     this.updateCanvasSize();
@@ -55,10 +53,17 @@ class LevelDrawer {
     if (!this.ctx) {
       return;
     }
-    this.ctx.canvas.width = this.width * devicePixelRatio;
-    this.ctx.canvas.height = this.height * devicePixelRatio;
     this.ctx.canvas.style.width = `${this.width}px`;
     this.ctx.canvas.style.height = `${this.height}px`;
+    this.ctx.canvas.width = this.width * devicePixelRatio;
+    this.ctx.canvas.height = this.height * devicePixelRatio;
+
+    console.log("style", {
+      style_width: this.width,
+      style_height: this.height,
+      width: this.width * devicePixelRatio,
+      height: this.height * devicePixelRatio,
+    });
 
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
 

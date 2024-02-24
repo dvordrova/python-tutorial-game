@@ -10,10 +10,17 @@ import { LevelDrawer } from "../utils/draw";
 const { Title } = Typography;
 
 // display: block;
+// overflow: auto;
 const SimulationCanvas = styled.canvas`
-  overflow: auto;
-  height: 100%;
-  width: 100%;
+  @media (max-width: 992px) {
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+  }
+
+  @media (min-width: 992px) {
+    max-width: calc(62vw - 30px);
+  }
 `;
 
 const SlownessRadioGroup = styled(Radio.Group)`
@@ -37,6 +44,9 @@ const slownessOptions = [
   { label: "x5", value: 50 / 5 },
 ];
 
+const devicePixelRatio =
+  typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+
 export default function SimulationField({
   level,
   simulationSteps,
@@ -59,6 +69,16 @@ export default function SimulationField({
       setSliderValue(0);
     }
   }, [canvasRef, level, toggleSimulation]);
+
+  // scale canvas
+  useEffect(() => {
+    const ctx = canvasRef?.current?.getContext("2d");
+    if (ctx) {
+      console.log("scale", { canvas: canvasRef.current, devicePixelRatio });
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+      levelDrawer?.updateCanvasSize();
+    }
+  }, [canvasRef, levelDrawer]);
   const updateSize = debounce(() => {
     if (levelDrawer !== undefined) {
       levelDrawer.updateCanvasSize();
@@ -161,6 +181,16 @@ export default function SimulationField({
     setSlowness(e.target.value);
   };
 
+  useEffect(() => {
+    const width = window.innerWidth * devicePixelRatio;
+    const height = window.innerHeight * devicePixelRatio;
+
+    if (canvasRef.current) {
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
+    }
+  }, [canvasRef]);
+
   return (
     <>
       <Slider
@@ -178,9 +208,9 @@ export default function SimulationField({
         optionType="button"
       />
       <Flex justify="center">
-        <Spin tip="Loading..." spinning={level === undefined}>
-          <SimulationCanvas ref={canvasRef} />
-        </Spin>
+        {/* <Spin tip="Loading..." spinning={level === undefined}> */}
+        <SimulationCanvas ref={canvasRef} />
+        {/* </Spin> */}
       </Flex>
     </>
   );

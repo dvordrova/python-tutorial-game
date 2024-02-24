@@ -15,6 +15,19 @@ import { runLevel } from "../service/http";
 
 const StyledButton = styled(Button)`
   margin-top: 10px;
+  display: inline;
+`;
+
+const StyledSimulationColumn = styled(Col)`
+  padding: 0px 10px 0px 10px;
+`;
+
+const StyledEditorColumn = styled(Col)`
+  padding: 10px 10px 0px 10px;
+  @media (min-width: 992px) {
+    padding-top: 84px;
+    padding-left: 0px;
+  }
 `;
 
 interface IPlayGroundProps {
@@ -79,13 +92,12 @@ export default function PlayGround({ level }: IPlayGroundProps) {
 
   return (
     <Row>
-      <Col
+      <StyledSimulationColumn
         xs={{ flex: "100%" }}
         sm={{ flex: "100%" }}
-        md={{ flex: "62%" }}
+        md={{ flex: "100%" }}
         lg={{ flex: "62%" }}
         xl={{ flex: "62%" }}
-        style={{ padding: "0px 10px 0px 10px" }}
       >
         <SimulationField
           key={level?.id}
@@ -93,9 +105,8 @@ export default function PlayGround({ level }: IPlayGroundProps) {
           simulationSteps={simulationSteps}
           toggleSimulation={toggleSimulation}
         />
-      </Col>
-
-      <Col flex="auto" style={{ padding: "32px 10px 0px 10px" }}>
+      </StyledSimulationColumn>
+      <StyledEditorColumn flex="auto">
         <Editor code={code} setCode={changeCode} />
         <Spin spinning={loadingRun}>
           <StyledButton
@@ -127,7 +138,7 @@ export default function PlayGround({ level }: IPlayGroundProps) {
               <Progress percent={70} size="small" status="exception" />
             )}
         </Spin>
-      </Col>
+      </StyledEditorColumn>
     </Row>
   );
 }

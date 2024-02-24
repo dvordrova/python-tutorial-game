@@ -1,9 +1,8 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import AceEditor from "react-ace";
 
-import { debounce } from "lodash";
 import { Spin } from "antd";
-import { getEditorWidth, getEditorHeight } from "../utils/sizes";
+import styled from "styled-components";
 
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-github_dark";
@@ -13,17 +12,12 @@ interface EdirotProps {
   setCode: (value: string) => void;
 }
 
-export default function Editor({ code, setCode }: EdirotProps) {
-  const [height, setHeight] = useState<number>(
-    getEditorHeight(window.innerHeight),
-  );
-  const [width, setWidth] = useState<number>(getEditorWidth(window.innerWidth));
-  const [editorLoaded, setEditorLoaded] = useState(false);
+const StyledEditor = styled(AceEditor)`
+  min-height: calc(100vh - 255.5px);
+`;
 
-  const updateSize = debounce(() => {
-    setWidth(getEditorWidth(window.innerWidth));
-    setHeight(getEditorHeight(window.innerHeight));
-  }, 300);
+export default function Editor({ code, setCode }: EdirotProps) {
+  const [editorLoaded, setEditorLoaded] = useState(false);
 
   const handleCodeChange = useCallback(
     (value: string, _: any) => {
@@ -32,16 +26,10 @@ export default function Editor({ code, setCode }: EdirotProps) {
     [setCode],
   );
 
-  useEffect(() => {
-    console.log("updateSize editor", updateSize);
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-  }, [updateSize]);
-
   return (
     <>
       <Spin tip="Editor loading..." spinning={!editorLoaded}>
-        <AceEditor
+        <StyledEditor
           value={code}
           placeholder="Ваш python код здесь"
           mode="python"
@@ -61,9 +49,8 @@ export default function Editor({ code, setCode }: EdirotProps) {
             tabSize: 2,
           }}
           wrapEnabled={true}
-          width={`${width}px`}
-          height={`${height}px`}
-          style={{ lineHeight: "2.0" }}
+          width={`100%`}
+          height={`calc(100vh - 500px)`}
         />
       </Spin>
     </>
