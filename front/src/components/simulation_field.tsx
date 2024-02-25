@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import styled from "styled-components";
 
-import { debounce } from "lodash";
+import { debounce, defer } from "lodash";
 import { Button, Slider, Spin, Flex, Radio, Typography } from "antd";
 
 import { PauseOutlined, CaretRightFilled } from "@ant-design/icons";
@@ -57,9 +57,9 @@ interface ISimulationFieldProps {
 }
 
 const slownessOptions = [
-  { label: "x1", value: 50 / 1 },
-  { label: "x2", value: 50 / 2 },
-  { label: "x5", value: 50 / 5 },
+  { label: "x1", value: 0.03 },
+  { label: "x2", value: 0.06 },
+  { label: "x5", value: 0.15 },
 ];
 
 const devicePixelRatio =
@@ -74,16 +74,30 @@ export default function SimulationField({
   const [sliderRange, setSliderRange] = useState(0);
   const [runningSimulation, setRunningSimulation] = useState(false);
   const [simulationFrameStart, setSimulationFrameStart] = useState(0);
-  const [slowness, setSlowness] = useState(50);
+  const [slowness, setSlowness] = useState(0.03);
   const [sliderValue, setSliderValue] = useState(0);
   const [levelDrawer, setLevelDrawer] = useState<LevelDrawer>();
+
+  // animation related
+  const requestId = useRef<number>();
+  const slownessRef = useRef<number>(slowness);
+  const runningSimulationRef = useRef<boolean>(runningSimulation);
+  const simulationStepsRef = useRef<ISimulationStep[] | undefined>(
+    simulationSteps,
+  );
+  const levelDrawerRef = useRef<LevelDrawer | undefined>(levelDrawer);
+  const levelRef = useRef<ILevel | undefined>(level);
+  const simulationFrameStartRef = useRef<number>(simulationFrameStart);
+  const simulationStepRef = useRef<number>(0);
+  const simulationStepPercentageRef = useRef<number>(0.0);
 
   // level drawer setters
   useEffect(() => {
     setLevelDrawer(new LevelDrawer(canvasRef, level));
     if (toggleSimulation) {
       setRunningSimulation(false);
-      setSimulationFrameStart(0);
+      simulationStepPercentageRef.current = 0;
+      simulationStepRef.current = 0;
       setSliderValue(0);
     }
   }, [canvasRef, level, toggleSimulation]);
@@ -105,6 +119,7 @@ export default function SimulationField({
   useEffect(() => {
     setSliderRange(simulationSteps ? simulationSteps.length - 1 : 0);
     setSimulationFrameStart(0);
+    simulationFrameStartRef.current = 0;
     setRunningSimulation(simulationSteps !== undefined);
   }, [simulationSteps, level, toggleSimulation]);
 
@@ -113,90 +128,78 @@ export default function SimulationField({
     return () => window.removeEventListener("resize", updateSize);
   });
 
-  const drawSimulation = useCallback(
-    (step: number, percentOfStep: number) => {
-      if (!levelDrawer) {
-        return;
-      }
-      levelDrawer.drawLevel();
-      if (level?.walls) {
-        levelDrawer.drawWalls(level.walls);
-      }
-
-      if (simulationSteps === undefined) {
-        return;
-      }
-
-      // count of robots should be constant between steps
-      let currentStep = simulationSteps[step];
-      let nextStep =
-        simulationSteps[Math.min(step + 1, simulationSteps.length - 1)];
-
-      // draw robots
-      levelDrawer.drawRobotsBetweenSteps(
-        currentStep.robots,
-        nextStep.robots,
-        percentOfStep,
-      );
-    },
-    [level, levelDrawer, simulationSteps],
-  );
-
   useEffect(() => {
-    console.debug("useEffect runningSimulation", {
-      slowness,
-      drawSimulation,
-      runningSimulation,
-      simulationSteps,
-      simulationFrameStart,
-      toggleSimulation,
+    runningSimulationRef.current = runningSimulation;
+    simulationStepsRef.current = simulationSteps;
+    levelDrawerRef.current = levelDrawer;
+    levelRef.current = level;
+  }, [runningSimulation, simulationSteps, levelDrawer, level]);
+
+  const animate = (_: any) => {
+    defer(() => {
+      requestId.current = requestAnimationFrame(animate);
     });
-    let frameCount = 0;
-    let animationFrameId: number;
-    if (!runningSimulation || !simulationSteps) {
-      console.debug("not drawing simulation: ", {
-        runningSimulation,
-        simulationSteps,
-      });
+    if (!runningSimulationRef.current || !simulationStepsRef.current) {
       return;
     }
-    
-    const render = () => {
-      console.debug("render function called");
-      frameCount++;
-      let simulationStep =
-        simulationFrameStart + Math.floor(frameCount / slowness);
-      let percentOfStep = (frameCount % slowness) / slowness;
-      if (simulationStep < simulationSteps.length) {
-        setSliderValue(simulationStep);
-        drawSimulation(simulationStep, percentOfStep);
-        animationFrameId = window.requestAnimationFrame(render);
-      } else {
-        setRunningSimulation(false);
+    simulationStepPercentageRef.current += slownessRef.current;
+    if (simulationStepPercentageRef.current >= 1) {
+      simulationStepPercentageRef.current -= 1;
+      simulationStepRef.current++;
+    }
+    let simulationStep = simulationStepRef.current;
+    let percentOfStep = simulationStepPercentageRef.current;
+    if (simulationStep >= simulationStepsRef.current.length) {
+      return;
+    }
+    setSliderValue(simulationStep);
+
+    if (!levelDrawerRef.current) {
+      return;
+    }
+    levelDrawerRef.current.drawLevel();
+    if (levelRef.current?.walls) {
+      levelDrawerRef.current.drawWalls(levelRef.current.walls);
+    }
+
+    // count of robots should be constant between steps
+    let currentStep = simulationStepsRef.current[simulationStep];
+    let nextStep =
+      simulationStepsRef.current[
+        Math.min(simulationStep + 1, simulationStepsRef.current.length - 1)
+      ];
+
+    console.log("drawing robots", {
+      currentStep,
+      nextStep,
+      percentOfStep,
+    });
+    levelDrawerRef.current.drawRobotsBetweenSteps(
+      currentStep.robots,
+      nextStep.robots,
+      percentOfStep,
+    );
+  };
+
+  useEffect(() => {
+    requestId.current = requestAnimationFrame(animate);
+    return () => {
+      if (requestId.current) {
+        cancelAnimationFrame(requestId.current);
       }
     };
-    render();
-    return () => {
-      console.log(`cancelingAnimationFrame ${animationFrameId}`);
-      window.cancelAnimationFrame(animationFrameId);
-    };
-  }, [
-    slowness,
-    drawSimulation,
-    runningSimulation,
-    simulationSteps,
-    simulationFrameStart,
-    toggleSimulation,
-  ]);
+  }, []);
 
   const clickSlider = debounce((value) => {
     setSliderValue(value);
-    setSimulationFrameStart(value);
+    simulationStepRef.current = value;
+    simulationStepPercentageRef.current = 0;
     setRunningSimulation(true);
   }, 300);
 
   const onSlownessChange = (e: any) => {
     setSlowness(e.target.value);
+    slownessRef.current = e.target.value;
   };
 
   const onPlayClick = () => {
