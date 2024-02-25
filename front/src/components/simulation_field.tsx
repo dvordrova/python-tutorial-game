@@ -2,7 +2,9 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import styled from "styled-components";
 
 import { debounce } from "lodash";
-import { Slider, Spin, Flex, Radio, Typography } from "antd";
+import { Button, Slider, Spin, Flex, Radio, Typography } from "antd";
+
+import { PauseOutlined, CaretRightFilled } from "@ant-design/icons";
 
 import { ILevel, ISimulationStep } from "../utils/model";
 import { LevelDrawer } from "../utils/draw";
@@ -21,6 +23,22 @@ const SimulationCanvas = styled.canvas`
   @media (min-width: 992px) {
     max-width: calc(62vw - 0.62 * 30px);
   }
+`;
+
+const PlaySliderWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-top: 4px;
+`;
+
+const PlaySlider = styled(Slider)`
+  flex-grow: 1;
+`;
+
+const PlayButton = styled(Button)`
+  display: inline;
+  margin-right: 10px;
 `;
 
 const SlownessRadioGroup = styled(Radio.Group)`
@@ -142,7 +160,7 @@ export default function SimulationField({
       });
       return;
     }
-
+    
     const render = () => {
       console.debug("render function called");
       frameCount++;
@@ -181,15 +199,24 @@ export default function SimulationField({
     setSlowness(e.target.value);
   };
 
+  const onPlayClick = () => {
+    setRunningSimulation((value) => !value);
+  };
+
+  const playIcon = runningSimulation ? <PauseOutlined /> : <CaretRightFilled />;
+
   return (
     <>
-      <Slider
-        value={sliderValue}
-        disabled={!simulationSteps}
-        max={sliderRange}
-        onChange={clickSlider}
-        tooltip={{ open: false }}
-      />
+      <PlaySliderWrapper>
+        <PlayButton icon={playIcon} size="small" onClick={onPlayClick} />
+        <PlaySlider
+          value={sliderValue}
+          disabled={!simulationSteps}
+          max={sliderRange}
+          onChange={clickSlider}
+          tooltip={{ open: false }}
+        />
+      </PlaySliderWrapper>
       <SpeedTitle level={4}>Скорость</SpeedTitle>
       <SlownessRadioGroup
         options={slownessOptions}
