@@ -4,7 +4,7 @@ function getCanvasHeight(windowsHeight: number) {
 
 function getCanvasWidth(windowsWidth: number) {
   return windowsWidth > 992
-    ? Math.floor((windowsWidth - 40) * 0.62)
+    ? Math.floor((windowsWidth - 30) * 0.62)
     : windowsWidth - 20;
 }
 

@@ -25,7 +25,7 @@ const StyledSimulationColumn = styled(Col)`
 const StyledEditorColumn = styled(Col)`
   padding: 10px 10px 0px 10px;
   @media (min-width: 992px) {
-    padding-top: 84px;
+    padding-top: 82.5px;
     padding-left: 0px;
   }
 `;

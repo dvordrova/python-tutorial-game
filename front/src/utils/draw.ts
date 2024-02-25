@@ -10,6 +10,9 @@ const bottomSensorY = 800;
 const leftSensorX = 204;
 const rightSensorX = 868;
 
+const devicePixelRatio =
+  typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+
 class LevelDrawer {
   ctx?: CanvasRenderingContext2D | null;
   robotImage: HTMLImageElement;
@@ -44,7 +47,7 @@ class LevelDrawer {
     this.width = getCanvasWidth(window.innerWidth);
     this.height = getCanvasHeight(window.innerHeight);
     if (this.level) {
-      if (this.level.width / this.level.height < 1) {
+      if (this.level.width / this.level.height < this.width / this.height) {
         this.width = this.height * (this.level.width / this.level.height);
       } else {
         this.height = this.width * (this.level.height / this.level.width);
@@ -113,8 +116,8 @@ class LevelDrawer {
     this.ctx.clearRect(0, 0, this.width, this.height);
     this.ctx.fillStyle = fieldColor;
     this.ctx.fillRect(
-      gapBeetween,
-      gapBeetween,
+      0,
+      0,
       (this.cellSize + gapBeetween) * this.level.width + gapBeetween,
       (this.cellSize + gapBeetween) * this.level.height + gapBeetween,
     );
@@ -123,8 +126,8 @@ class LevelDrawer {
     for (let x = 0; x < this.level.width; x++) {
       for (let y = 0; y < this.level.height; y++) {
         this.ctx.rect(
-          x * (this.cellSize + gapBeetween),
-          y * (this.cellSize + gapBeetween),
+          gapBeetween + x * (this.cellSize + gapBeetween),
+          gapBeetween + y * (this.cellSize + gapBeetween),
           this.cellSize,
           this.cellSize,
         );
@@ -137,8 +140,12 @@ class LevelDrawer {
       console.debug("drawLevel award", i);
       let award = this.level.awards[i];
       this.drawAward(
-        award.x * (this.cellSize + gapBeetween) + this.cellSize / 2,
-        award.y * (this.cellSize + gapBeetween) + this.cellSize / 2,
+        gapBeetween +
+          award.x * (this.cellSize + gapBeetween) +
+          this.cellSize / 2,
+        gapBeetween +
+          award.y * (this.cellSize + gapBeetween) +
+          this.cellSize / 2,
       );
     }
   }
@@ -230,8 +237,8 @@ class LevelDrawer {
     }
     console.debug("drawRobots");
     for (let i = 0; i < robots.length; i++) {
-      let x = robots[i].x * (this.cellSize + gapBeetween);
-      let y = robots[i].y * (this.cellSize + gapBeetween);
+      let x = gapBeetween + robots[i].x * (this.cellSize + gapBeetween);
+      let y = gapBeetween + robots[i].y * (this.cellSize + gapBeetween);
       this.drawRobot({ x, y, sensors: robots[i].sensors });
     }
   }

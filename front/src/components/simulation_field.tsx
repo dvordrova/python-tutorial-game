@@ -13,13 +13,13 @@ const { Title } = Typography;
 // overflow: auto;
 const SimulationCanvas = styled.canvas`
   @media (max-width: 992px) {
-    max-width: 100vw;
+    max-width: calc(100vw - 20px);
     height: 100vh;
     max-height: 100vh;
   }
 
   @media (min-width: 992px) {
-    max-width: calc(62vw - 30px);
+    max-width: calc(62vw - 0.62 * 30px);
   }
 `;
 
